@@ -3,7 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const posts = Array.from(document.querySelectorAll('.post'));
     const totalPosts = posts.length;
     let totalPages = Math.ceil(totalPosts / postsPerPage);
-    
+    let currentPage = 1;
+    let shouldScroll = true;
+
     // Function to update postsPerPage based on screen width
     function updatePostsPerPage() {
         if (window.matchMedia("(max-width: 1200px)").matches) {
@@ -12,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
             postsPerPage = 3;
         }
         totalPages = Math.ceil(totalPosts / postsPerPage);
-        goToPage(1); // Reset to first page to adjust the view
+        goToPage(currentPage); // Maintain current page
     }
 
     // Sort posts in descending order based on class name
@@ -21,8 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const bNum = parseInt(b.className.match(/\d+/)[0]);
         return bNum - aNum;
     });
-
-    let currentPage = 1;
 
     function showPage(page) {
         posts.forEach((post, index) => {
@@ -36,22 +36,41 @@ document.addEventListener('DOMContentLoaded', () => {
         if (page < 1 || page > totalPages) return;
         currentPage = page;
         showPage(currentPage);
-        window.scrollTo(0, 0); // Scroll to the top of the page
+        if (shouldScroll) {
+            window.scrollTo(0, 0); // Scroll to the top of the page
+        }
     }
 
     // Event listeners for pagination
     document.getElementById('prev').addEventListener('click', () => {
-        if (currentPage > 1) goToPage(currentPage - 1);
+        if (currentPage > 1) {
+            shouldScroll = true;
+            goToPage(currentPage - 1);
+        }
     });
 
     document.getElementById('next').addEventListener('click', () => {
-        if (currentPage < totalPages) goToPage(currentPage + 1);
+        if (currentPage < totalPages) {
+            shouldScroll = true;
+            goToPage(currentPage + 1);
+        }
     });
 
     // Initialize the page display
     updatePostsPerPage();
     showPage(currentPage);
 
-    // Add an event listener to adjust posts per page on window resize
-    window.addEventListener('resize', updatePostsPerPage);
+    // Debounced resize handler to avoid excessive function calls
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            updatePostsPerPage();
+        }, 200); // Adjust delay as needed
+    });
+
+    // Debugging: Detect if scrolling is triggered without user interaction
+    window.addEventListener('scroll', () => {
+        console.log('Scroll event detected!');
+    });
 });
