@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const posts = Array.from(document.querySelectorAll('.post'));
     const totalPosts = posts.length;
     let totalPages = Math.ceil(totalPosts / postsPerPage);
-    
+
     // Function to update postsPerPage based on screen width
     function updatePostsPerPage() {
         if (window.matchMedia("(max-width: 1200px)").matches) {
@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     let currentPage = 1;
+    let shouldScroll = true; // Flag to determine if scrolling should occur
 
     function showPage(page) {
         posts.forEach((post, index) => {
@@ -36,16 +37,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (page < 1 || page > totalPages) return;
         currentPage = page;
         showPage(currentPage);
-        window.scrollTo(0, 0); // Scroll to the top of the page
+        if (shouldScroll) {
+            window.scrollTo(0, 0); // Scroll to the top of the page
+        }
     }
 
     // Event listeners for pagination
     document.getElementById('prev').addEventListener('click', () => {
-        if (currentPage > 1) goToPage(currentPage - 1);
+        if (currentPage > 1) {
+            shouldScroll = true;
+            goToPage(currentPage - 1);
+        }
     });
 
     document.getElementById('next').addEventListener('click', () => {
-        if (currentPage < totalPages) goToPage(currentPage + 1);
+        if (currentPage < totalPages) {
+            shouldScroll = true;
+            goToPage(currentPage + 1);
+        }
     });
 
     // Initialize the page display
@@ -54,4 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add an event listener to adjust posts per page on window resize
     window.addEventListener('resize', updatePostsPerPage);
+
+    // Prevent automatic scrolling on resize by resetting the flag
+    window.addEventListener('resize', () => {
+        shouldScroll = false;
+    });
 });
