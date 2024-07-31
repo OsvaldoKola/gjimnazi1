@@ -3,8 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const posts = Array.from(document.querySelectorAll('.post'));
     const totalPosts = posts.length;
     let totalPages = Math.ceil(totalPosts / postsPerPage);
+
     let currentPage = 1;
-    let shouldScroll = true;
+    let shouldScroll = false; // Flag to control scrolling
 
     // Function to update postsPerPage based on screen width
     function updatePostsPerPage() {
@@ -14,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
             postsPerPage = 9;
         }
         totalPages = Math.ceil(totalPosts / postsPerPage);
-        goToPage(currentPage); // Maintain current page
+        goToPage(currentPage); // Keep the current page
     }
 
     // Sort posts in descending order based on class name
@@ -44,14 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listeners for pagination
     document.getElementById('prev').addEventListener('click', () => {
         if (currentPage > 1) {
-            shouldScroll = true;
+            shouldScroll = true; // Enable scroll
             goToPage(currentPage - 1);
         }
     });
 
     document.getElementById('next').addEventListener('click', () => {
         if (currentPage < totalPages) {
-            shouldScroll = true;
+            shouldScroll = true; // Enable scroll
             goToPage(currentPage + 1);
         }
     });
@@ -69,8 +70,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200); // Adjust delay as needed
     });
 
-    // Debugging: Detect if scrolling is triggered without user interaction
+    // Debugging: Log if unintended scroll happens
+    let lastScrollTop = 0;
     window.addEventListener('scroll', () => {
-        console.log('Scroll event detected!');
+        const currentScrollTop = window.scrollY || document.documentElement.scrollTop;
+        if (Math.abs(currentScrollTop - lastScrollTop) > 5) { // Detect significant scroll
+            console.log('Unintended scroll detected!');
+            lastScrollTop = currentScrollTop;
+        }
+    });
+
+    // Ensure scrolling flag is reset on resize or other actions
+    window.addEventListener('resize', () => {
+        shouldScroll = false; // Reset flag
+    });
+
+    // Preventing unwanted scroll on page load
+    window.addEventListener('load', () => {
+        shouldScroll = false;
     });
 });
